@@ -1,0 +1,1003 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Analytical Tension Model Explorer</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --panel-2: #f9fafc;
+      --ink: #18202f;
+      --muted: #667085;
+      --line: #d8dee9;
+      --grid: #e8edf5;
+      --accent: #235ee8;
+      --accent-2: #d6242f;
+      --pg: #19953a;
+      --pm: #d6242f;
+      --total: #151923;
+      --pressure: #7c4fb5;
+      --shadow: 0 14px 34px rgba(27, 39, 69, 0.10);
+      --radius: 8px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 360px minmax(0, 1fr);
+    }
+
+    aside {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+      border-right: 1px solid var(--line);
+      background: #ffffff;
+      padding: 18px 16px 22px;
+    }
+
+    main {
+      min-width: 0;
+      padding: 22px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: #101828;
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 19px;
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    .subtle {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+      margin-top: 2px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .topbar h2 {
+      font-size: 24px;
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    .mode-group {
+      display: flex;
+      gap: 6px;
+      padding: 4px;
+      background: #e9eef8;
+      border-radius: 8px;
+      border: 1px solid #d8e0ee;
+    }
+
+    .mode-button {
+      border: 0;
+      background: transparent;
+      padding: 8px 10px;
+      border-radius: 6px;
+      color: #344054;
+      cursor: pointer;
+      font-size: 13px;
+      line-height: 1;
+    }
+
+    .mode-button.active {
+      background: #fff;
+      color: #101828;
+      box-shadow: 0 1px 4px rgba(16, 24, 40, 0.16);
+    }
+
+    .section {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+
+    .section h3 {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #475467;
+      margin-bottom: 12px;
+    }
+
+    .control {
+      display: grid;
+      grid-template-columns: 1fr 108px;
+      gap: 8px 10px;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .control:last-child {
+      margin-bottom: 0;
+    }
+
+    .control label {
+      font-size: 13px;
+      font-weight: 650;
+      line-height: 1.2;
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    .control label span {
+      color: var(--muted);
+      font-weight: 500;
+      font-size: 11px;
+    }
+
+    .control input[type="number"] {
+      width: 100%;
+      border: 1px solid #cfd6e4;
+      border-radius: 6px;
+      padding: 7px 8px;
+      color: #111827;
+      background: #fff;
+      text-align: right;
+      font-size: 13px;
+    }
+
+    .control input[type="range"] {
+      grid-column: 1 / -1;
+      width: 100%;
+      accent-color: var(--accent);
+    }
+
+    .select-row {
+      display: grid;
+      gap: 8px;
+    }
+
+    .select-row label {
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    select {
+      width: 100%;
+      border: 1px solid #cfd6e4;
+      border-radius: 6px;
+      padding: 8px;
+      background: #fff;
+      color: #111827;
+      font-size: 13px;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .action-button {
+      border: 1px solid #cfd6e4;
+      background: #fff;
+      color: #111827;
+      border-radius: 7px;
+      padding: 9px 10px;
+      font-weight: 650;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .action-button.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .metric {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 12px 13px;
+      box-shadow: 0 5px 16px rgba(27, 39, 69, 0.06);
+    }
+
+    .metric .label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .metric .value {
+      font-size: 20px;
+      font-weight: 760;
+      letter-spacing: 0;
+    }
+
+    .metric .unit {
+      color: var(--muted);
+      font-size: 12px;
+      margin-left: 4px;
+      font-weight: 600;
+    }
+
+    .equation-strip {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .equation-chip {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 12px;
+      min-height: 80px;
+    }
+
+    .equation-chip .name {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+
+    .equation {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 12px;
+      line-height: 1.45;
+      color: #111827;
+      white-space: normal;
+    }
+
+    .plot-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .plot-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .plot-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      padding: 14px 14px 10px;
+      border-bottom: 1px solid #edf1f7;
+    }
+
+    .plot-head h3 {
+      font-size: 15px;
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+
+    .plot-head .plot-equation {
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.35;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      max-width: 310px;
+      text-align: right;
+    }
+
+    .plot-body {
+      position: relative;
+      padding: 8px 12px 12px;
+    }
+
+    svg.plot {
+      display: block;
+      width: 100%;
+      height: auto;
+      background: #fff;
+      border-radius: 6px;
+    }
+
+    .tooltip {
+      position: absolute;
+      pointer-events: none;
+      transform: translate(10px, -8px);
+      background: rgba(17, 24, 39, 0.92);
+      color: #fff;
+      border-radius: 6px;
+      padding: 7px 8px;
+      font-size: 11px;
+      line-height: 1.45;
+      min-width: 170px;
+      opacity: 0;
+      transition: opacity 80ms ease;
+      z-index: 5;
+      white-space: pre-line;
+    }
+
+    .tooltip.visible {
+      opacity: 1;
+    }
+
+    .axis-label {
+      fill: #344054;
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .tick-label {
+      fill: #475467;
+      font-size: 10px;
+    }
+
+    .legend-label {
+      fill: #344054;
+      font-size: 11px;
+    }
+
+    .status-note {
+      margin-top: 10px;
+      padding: 10px 11px;
+      border-radius: 7px;
+      background: #f4f7ff;
+      color: #31415f;
+      border: 1px solid #d8e2ff;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    @media (max-width: 1180px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      aside {
+        position: static;
+        height: auto;
+      }
+
+      .summary-grid,
+      .equation-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 860px) {
+      main {
+        padding: 14px;
+      }
+
+      .topbar {
+        display: grid;
+      }
+
+      .plot-grid,
+      .summary-grid,
+      .equation-strip {
+        grid-template-columns: 1fr;
+      }
+
+      .plot-head {
+        grid-template-columns: 1fr;
+      }
+
+      .plot-head .plot-equation {
+        max-width: none;
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside>
+      <div class="brand">
+        <div class="mark">ε</div>
+        <div>
+          <h1>Analytical Model Explorer</h1>
+          <p class="subtle">Live PG/PM tension and pressure sanity checks</p>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>Model interpretation</h3>
+        <div class="select-row">
+          <label for="epsilonMode">epsilon meaning</label>
+          <select id="epsilonMode">
+            <option value="area">area strain: ε = ΔA/A₀</option>
+            <option value="radial">radial strain: ε = Δr/r₀</option>
+          </select>
+        </div>
+        <div class="status-note" id="modeNote"></div>
+      </div>
+
+      <div class="section">
+        <h3>Variables</h3>
+        <div id="controls"></div>
+      </div>
+
+      <div class="section">
+        <h3>Actions</h3>
+        <div class="actions">
+          <button class="action-button" id="resetBtn">Reset</button>
+          <button class="action-button primary" id="csvBtn">Download CSV</button>
+        </div>
+      </div>
+    </aside>
+
+    <main>
+      <div class="topbar">
+        <div>
+          <h2>One-case analytical plot debugger</h2>
+          <p class="subtle">The plots recompute from the equations directly. Pressure is derived after PG and PM tensions are computed.</p>
+        </div>
+        <div class="mode-group" aria-label="quick presets">
+          <button class="mode-button active" data-preset="default">Baseline</button>
+          <button class="mode-button" data-preset="soft">Soft PG</button>
+          <button class="mode-button" data-preset="large">Large reservoir</button>
+        </div>
+      </div>
+
+      <section class="summary-grid" id="metrics"></section>
+
+      <section class="equation-strip">
+        <div class="equation-chip">
+          <div class="name">stiffening</div>
+          <div class="equation">g(ε) = δc [ exp(ε / δc) - 1 ]</div>
+        </div>
+        <div class="equation-chip">
+          <div class="name">PG tension</div>
+          <div class="equation">TPG = G0 ((3β - 1)/β) · 2g(ε)/(1+ε)</div>
+        </div>
+        <div class="equation-chip">
+          <div class="name">PM tension</div>
+          <div class="equation" id="pmEquationTop"></div>
+        </div>
+        <div class="equation-chip">
+          <div class="name">Laplace</div>
+          <div class="equation" id="laplaceEquationTop"></div>
+        </div>
+      </section>
+
+      <section class="plot-grid" id="plots"></section>
+    </main>
+  </div>
+
+  <script>
+    const ATM_PA = 101325;
+    const COLORS = {
+      g: "#1f77b4",
+      small: "#687386",
+      pg: "#19953a",
+      pm: "#d6242f",
+      total: "#151923",
+      pressure: "#7c4fb5",
+      activation: "#b00020",
+      identity: "#235ee8"
+    };
+
+    const PARAMS = [
+      { key: "beta", label: "β", detail: "geometry", min: 0.4, max: 3, step: 0.01, value: 1 },
+      { key: "r0Um", label: "r₀", detail: "µm", min: 0.1, max: 2, step: 0.01, value: 0.5 },
+      { key: "g0", label: "G₀", detail: "N/m", min: 0.001, max: 0.08, step: 0.001, value: 0.02 },
+      { key: "ka", label: "Kᴬ", detail: "N/m", min: 0.01, max: 1, step: 0.01, value: 0.25 },
+      { key: "deltaC", label: "δc", detail: "strain scale", min: 0.005, max: 0.15, step: 0.001, value: 0.04 },
+      { key: "alpha", label: "α*", detail: "PM reservoir", min: 0, max: 0.5, step: 0.005, value: 0.1 },
+      { key: "epsilonMax", label: "ε max", detail: "plot range", min: 0.02, max: 0.5, step: 0.005, value: 0.22 }
+    ];
+
+    const defaults = Object.fromEntries(PARAMS.map((p) => [p.key, p.value]));
+    const state = { ...defaults, epsilonMode: "area" };
+
+    const controlsEl = document.getElementById("controls");
+    const plotsEl = document.getElementById("plots");
+    const metricsEl = document.getElementById("metrics");
+    const modeNoteEl = document.getElementById("modeNote");
+    const epsilonModeEl = document.getElementById("epsilonMode");
+
+    function fmt(value, digits = 3) {
+      if (!Number.isFinite(value)) return "n/a";
+      if (Math.abs(value) >= 100) return value.toFixed(1);
+      if (Math.abs(value) >= 10) return value.toFixed(2);
+      if (Math.abs(value) >= 1) return value.toFixed(digits);
+      if (Math.abs(value) >= 0.01) return value.toFixed(4);
+      return value.toExponential(2);
+    }
+
+    function clamp(value, min, max) {
+      return Math.min(max, Math.max(min, value));
+    }
+
+    function renderControls() {
+      controlsEl.innerHTML = "";
+      PARAMS.forEach((param) => {
+        const row = document.createElement("div");
+        row.className = "control";
+        row.innerHTML = `
+          <label for="${param.key}-number">${param.label}<span>${param.detail}</span></label>
+          <input id="${param.key}-number" type="number" min="${param.min}" max="${param.max}" step="${param.step}" value="${state[param.key]}">
+          <input id="${param.key}-range" type="range" min="${param.min}" max="${param.max}" step="${param.step}" value="${state[param.key]}">
+        `;
+        controlsEl.appendChild(row);
+
+        const number = row.querySelector(`#${param.key}-number`);
+        const range = row.querySelector(`#${param.key}-range`);
+        const setValue = (raw) => {
+          const next = clamp(Number(raw), param.min, param.max);
+          state[param.key] = next;
+          number.value = next;
+          range.value = next;
+          render();
+        };
+        number.addEventListener("input", (event) => setValue(event.target.value));
+        range.addEventListener("input", (event) => setValue(event.target.value));
+      });
+    }
+
+    function gStiffening(epsilon, p) {
+      return p.deltaC * (Math.exp(epsilon / p.deltaC) - 1);
+    }
+
+    function tensionPg(epsilon, p) {
+      const betaFactor = (3 * p.beta - 1) / p.beta;
+      return p.g0 * betaFactor * (2 * gStiffening(epsilon, p) / (1 + epsilon));
+    }
+
+    function areaChangeForPm(epsilon, p) {
+      if (p.epsilonMode === "area") return epsilon;
+      return (1 + epsilon) * (1 + epsilon) - 1;
+    }
+
+    function tensionPm(epsilon, p) {
+      return p.ka * Math.max(0, areaChangeForPm(epsilon, p) - p.alpha);
+    }
+
+    function radiusMeters(epsilon, p) {
+      const r0 = p.r0Um * 1e-6;
+      if (p.epsilonMode === "area") return r0 * Math.sqrt(1 + epsilon);
+      return r0 * (1 + epsilon);
+    }
+
+    function pressureAtm(epsilon, totalTension, p) {
+      return (2 * totalTension / radiusMeters(epsilon, p)) / ATM_PA;
+    }
+
+    function computeModel() {
+      const p = { ...state };
+      const n = 900;
+      const eps = [];
+      const g = [];
+      const pg = [];
+      const pm = [];
+      const total = [];
+      const pressure = [];
+      const identity = [];
+      const areaChange = [];
+
+      for (let i = 0; i < n; i += 1) {
+        const e = (p.epsilonMax * i) / (n - 1);
+        const gValue = gStiffening(e, p);
+        const pgValue = tensionPg(e, p);
+        const pmValue = tensionPm(e, p);
+        const totalValue = pgValue + pmValue;
+        eps.push(e);
+        g.push(gValue);
+        pg.push(pgValue * 1e3);
+        pm.push(pmValue * 1e3);
+        total.push(totalValue * 1e3);
+        pressure.push(pressureAtm(e, totalValue, p));
+        identity.push((totalValue - pgValue) * 1e3);
+        areaChange.push(areaChangeForPm(e, p));
+      }
+
+      return { eps, g, pg, pm, total, pressure, identity, areaChange, params: p };
+    }
+
+    function findActivation(model) {
+      const alpha = model.params.alpha;
+      let best = 0;
+      let bestDistance = Infinity;
+      for (let i = 0; i < model.eps.length; i += 1) {
+        const distance = Math.abs(model.areaChange[i] - alpha);
+        if (distance < bestDistance) {
+          bestDistance = distance;
+          best = i;
+        }
+      }
+      return {
+        index: best,
+        epsilon: model.eps[best],
+        pressure: model.pressure[best],
+        pg: model.pg[best],
+        pm: model.pm[best],
+        total: model.total[best],
+        areaChange: model.areaChange[best]
+      };
+    }
+
+    function niceTicks(min, max, count = 5) {
+      if (!Number.isFinite(min) || !Number.isFinite(max) || min === max) return [min || 0];
+      const span = max - min;
+      const raw = span / Math.max(1, count - 1);
+      const power = Math.pow(10, Math.floor(Math.log10(raw)));
+      const niceFraction = fraction <= 1 ? 1 : fraction <= 2 ? 2 : fraction <= 5 ? 5 : 10;
+      const step = niceFraction * power;
+      const start = Math.ceil(min / step) * step;
+      const ticks = [];
+      for (let v = start; v <= max + step * 0.5; v += step) ticks.push(v);
+      if (ticks.length < 2) return [min, max];
+      return ticks.slice(0, 8);
+    }
+
+    function pathFromSeries(xs, ys, xScale, yScale) {
+      let d = "";
+      for (let i = 0; i < xs.length; i += 1) {
+        const x = xScale(xs[i]);
+        const y = yScale(ys[i]);
+        d += `${i === 0 ? "M" : "L"}${x.toFixed(2)},${y.toFixed(2)}`;
+      }
+      return d;
+    }
+
+    function makePlotCard(config) {
+      const card = document.createElement("article");
+      card.className = "plot-card";
+      card.innerHTML = `
+        <div class="plot-head">
+          <h3>${config.title}</h3>
+          <div class="plot-equation">${config.equation}</div>
+        </div>
+        <div class="plot-body">
+          <svg class="plot" viewBox="0 0 680 430" role="img" aria-label="${config.title}"></svg>
+          <div class="tooltip"></div>
+        </div>
+      `;
+      plotsEl.appendChild(card);
+      return card;
+    }
+
+    function drawPlot(card, config, model) {
+      const svg = card.querySelector("svg");
+      const tooltip = card.querySelector(".tooltip");
+      const W = 680;
+      const H = 430;
+      const margin = { top: 22, right: 42, bottom: 58, left: 76 };
+      const pw = W - margin.left - margin.right;
+      const ph = H - margin.top - margin.bottom;
+      const xs = config.x(model);
+      const series = config.series(model);
+      const allY = series.flatMap((s) => s.y).filter((v) => Number.isFinite(v));
+      let xMin = config.xMin ?? Math.min(...xs);
+      let xMax = config.xMax ?? Math.max(...xs);
+      let yMin = config.yMin ?? Math.min(0, Math.min(...allY));
+      let yMax = config.yMax ?? Math.max(...allY);
+      if (yMax <= yMin) yMax = yMin + 1;
+      yMax *= config.yPad ?? 1.08;
+
+      const xScale = (v) => margin.left + ((v - xMin) / (xMax - xMin || 1)) * pw;
+      const yScale = (v) => margin.top + ph - ((v - yMin) / (yMax - yMin || 1)) * ph;
+      const xTicks = niceTicks(xMin, xMax, 6);
+      const yTicks = niceTicks(yMin, yMax, 6);
+
+      const activation = findActivation(model);
+      const activationXValue = config.activationAxis === "pressure" ? activation.pressure : activation.epsilon;
+      const activationX = xScale(activationXValue);
+
+      let markup = "";
+      markup += `<rect x="0" y="0" width="${W}" height="${H}" fill="#fff"></rect>`;
+      markup += `<g>`;
+      yTicks.forEach((tick) => {
+        const y = yScale(tick);
+        markup += `<line x1="${margin.left}" x2="${W - margin.right}" y1="${y}" y2="${y}" stroke="var(--grid)" stroke-width="1"></line>`;
+        markup += `<text class="tick-label" x="${margin.left - 10}" y="${y + 3}" text-anchor="end">${fmt(tick, 2)}</text>`;
+      });
+      xTicks.forEach((tick) => {
+        const x = xScale(tick);
+        markup += `<line x1="${x}" x2="${x}" y1="${margin.top}" y2="${H - margin.bottom}" stroke="var(--grid)" stroke-width="1"></line>`;
+        markup += `<text class="tick-label" x="${x}" y="${H - margin.bottom + 20}" text-anchor="middle">${fmt(tick, 2)}</text>`;
+      });
+      markup += `<line x1="${margin.left}" x2="${W - margin.right}" y1="${H - margin.bottom}" y2="${H - margin.bottom}" stroke="#475467" stroke-width="1.2"></line>`;
+      markup += `<line x1="${margin.left}" x2="${margin.left}" y1="${margin.top}" y2="${H - margin.bottom}" stroke="#475467" stroke-width="1.2"></line>`;
+
+      if (Number.isFinite(activationX) && activationX >= margin.left && activationX <= W - margin.right) {
+        markup += `<line x1="${activationX}" x2="${activationX}" y1="${margin.top}" y2="${H - margin.bottom}" stroke="${COLORS.activation}" stroke-width="2" stroke-dasharray="4 5"></line>`;
+      }
+
+      series.forEach((s) => {
+        const d = pathFromSeries(xs, s.y, xScale, yScale);
+        markup += `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="${s.width || 2.5}" ${s.dash ? `stroke-dasharray="${s.dash}"` : ""}></path>`;
+      });
+
+      const legendX = margin.left + 12;
+      let legendY = margin.top + 16;
+      series.forEach((s) => {
+        markup += `<line x1="${legendX}" x2="${legendX + 26}" y1="${legendY}" y2="${legendY}" stroke="${s.color}" stroke-width="3" ${s.dash ? `stroke-dasharray="${s.dash}"` : ""}></line>`;
+        markup += `<text class="legend-label" x="${legendX + 34}" y="${legendY + 4}">${s.name}</text>`;
+        legendY += 18;
+      });
+
+      markup += `<text class="axis-label" x="${margin.left + pw / 2}" y="${H - 14}" text-anchor="middle">${config.xLabel}</text>`;
+      markup += `<text class="axis-label" transform="translate(20 ${margin.top + ph / 2}) rotate(-90)" text-anchor="middle">${config.yLabel}</text>`;
+      markup += `<rect class="hit" x="${margin.left}" y="${margin.top}" width="${pw}" height="${ph}" fill="transparent"></rect>`;
+      markup += `</g>`;
+      svg.innerHTML = markup;
+
+      const hit = svg.querySelector(".hit");
+      hit.addEventListener("mousemove", (event) => {
+        const rect = svg.getBoundingClientRect();
+        const sx = W / rect.width;
+        const localX = (event.clientX - rect.left) * sx;
+        const valueX = xMin + ((localX - margin.left) / pw) * (xMax - xMin);
+        let index = 0;
+        let dist = Infinity;
+        for (let i = 0; i < xs.length; i += 1) {
+          const d = Math.abs(xs[i] - valueX);
+          if (d < dist) {
+            dist = d;
+            index = i;
+          }
+        }
+        const lines = [`${config.xLabel}: ${fmt(xs[index], 4)}`];
+        series.forEach((s) => lines.push(`${s.name}: ${fmt(s.y[index], 4)}`));
+        tooltip.textContent = lines.join("\n");
+        tooltip.style.left = `${event.offsetX}px`;
+        tooltip.style.top = `${event.offsetY}px`;
+        tooltip.classList.add("visible");
+      });
+      hit.addEventListener("mouseleave", () => tooltip.classList.remove("visible"));
+    }
+
+    function plotConfigs() {
+      return [
+        {
+          title: "1. Stiffening function",
+          equation: "g(ε) = δc [exp(ε/δc) - 1]",
+          x: (m) => m.eps,
+          series: (m) => [
+            { name: "g(ε)", y: m.g, color: COLORS.g },
+            { name: "small-strain ε", y: m.eps, color: COLORS.small, dash: "7 5", width: 2 }
+          ],
+          xLabel: "ε",
+          yLabel: "g(ε)"
+        },
+        {
+          title: "2. PG tension vs strain",
+          equation: "smooth from ε = 0; no α* kink",
+          x: (m) => m.eps,
+          series: (m) => [{ name: "PG", y: m.pg, color: COLORS.pg }],
+          xLabel: "ε",
+          yLabel: "TPG [mN/m]"
+        },
+        {
+          title: "3. PM tension vs strain",
+          equation: () => document.getElementById("pmEquationTop").textContent,
+          x: (m) => m.eps,
+          series: (m) => [{ name: "PM", y: m.pm, color: COLORS.pm }],
+          xLabel: "ε",
+          yLabel: "TPM [mN/m]"
+        },
+        {
+          title: "4. Components vs strain",
+          equation: "Ttotal = TPG + TPM",
+          x: (m) => m.eps,
+          series: (m) => [
+            { name: "PG", y: m.pg, color: COLORS.pg },
+            { name: "PM", y: m.pm, color: COLORS.pm },
+            { name: "total", y: m.total, color: COLORS.total, dash: "9 6", width: 2.8 }
+          ],
+          xLabel: "ε",
+          yLabel: "tension [mN/m]"
+        },
+        {
+          title: "5. Pressure from Laplace",
+          equation: "P is derived after tension is computed",
+          x: (m) => m.eps,
+          series: (m) => [{ name: "P", y: m.pressure, color: COLORS.pressure }],
+          xLabel: "ε",
+          yLabel: "P [atm]"
+        },
+        {
+          title: "6. Components vs pressure",
+          equation: "same tensions, re-plotted against P",
+          x: (m) => m.pressure,
+          activationAxis: "pressure",
+          series: (m) => [
+            { name: "PG", y: m.pg, color: COLORS.pg },
+            { name: "PM", y: m.pm, color: COLORS.pm },
+            { name: "total", y: m.total, color: COLORS.total, dash: "9 6", width: 2.8 }
+          ],
+          xLabel: "P [atm]",
+          yLabel: "tension [mN/m]"
+        },
+        {
+          title: "7. Sum check",
+          equation: "Ttotal - TPG should equal TPM exactly",
+          x: (m) => m.eps,
+          series: (m) => [
+            { name: "PM", y: m.pm, color: COLORS.pm, width: 3 },
+            { name: "total - PG", y: m.identity, color: COLORS.identity, dash: "6 5", width: 2.5 }
+          ],
+          xLabel: "ε",
+          yLabel: "mN/m"
+        }
+      ];
+    }
+
+    function renderMetrics(model) {
+      const activation = findActivation(model);
+      const end = model.eps.length - 1;
+      const items = [
+        { label: "activation ε", value: activation.epsilon, unit: "" },
+        { label: "activation P", value: activation.pressure, unit: "atm" },
+        { label: "endpoint total", value: model.total[end], unit: "mN/m" },
+        { label: "endpoint P", value: model.pressure[end], unit: "atm" }
+      ];
+      metricsEl.innerHTML = items.map((item) => `
+        <div class="metric">
+          <div class="label">${item.label}</div>
+          <div class="value">${fmt(item.value, 3)}<span class="unit">${item.unit}</span></div>
+        </div>
+      `).join("");
+    }
+
+    function renderEquations() {
+      const areaMode = state.epsilonMode === "area";
+      document.getElementById("pmEquationTop").textContent = areaMode
+        ? "TPM = KA · max(0, ε - α*)"
+        : "TPM = KA · max(0, (1+ε)^2 - 1 - α*)";
+      document.getElementById("laplaceEquationTop").textContent = areaMode
+        ? "P = 2(TPG+TPM) / [r0 sqrt(1+ε)]"
+        : "P = 2(TPG+TPM) / [r0(1+ε)]";
+      modeNoteEl.textContent = areaMode
+        ? "Area-strain mode matches the current sanity check: PM is zero until ε exceeds α*, then rises linearly."
+        : "Radial-strain mode treats area change as (1+ε)^2 - 1. This is useful for testing the notation ambiguity.";
+    }
+
+    function renderPlots(model) {
+      plotsEl.innerHTML = "";
+      plotConfigs().forEach((config) => {
+        const resolvedConfig = { ...config };
+        if (typeof resolvedConfig.equation === "function") resolvedConfig.equation = resolvedConfig.equation();
+        const card = makePlotCard(resolvedConfig);
+        drawPlot(card, resolvedConfig, model);
+      });
+    }
+
+    function render() {
+      renderEquations();
+      const model = computeModel();
+      renderMetrics(model);
+      renderPlots(model);
+    }
+
+    function setPreset(name) {
+      Object.assign(state, defaults);
+      document.querySelectorAll("[data-preset]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.preset === name);
+      });
+      if (name === "soft") {
+        state.g0 = 0.008;
+        state.deltaC = 0.065;
+        state.epsilonMax = 0.35;
+      }
+      if (name === "large") {
+        state.alpha = 0.2;
+        state.epsilonMax = 0.35;
+      }
+      PARAMS.forEach((param) => {
+        const n = document.getElementById(`${param.key}-number`);
+        const r = document.getElementById(`${param.key}-range`);
+        if (n && r) {
+          n.value = state[param.key];
+          r.value = state[param.key];
+        }
+      });
+      render();
+    }
+
+    function downloadCsv() {
+      const model = computeModel();
+      const rows = [
+        ["epsilon", "area_change_for_pm", "g_epsilon", "t_pg_mN_per_m", "t_pm_mN_per_m", "t_total_mN_per_m", "pressure_atm"]
+      ];
+      for (let i = 0; i < model.eps.length; i += 1) {
+        rows.push([
+          model.eps[i],
+          model.areaChange[i],
+          model.g[i],
+          model.pg[i],
+          model.pm[i],
+          model.total[i],
+          model.pressure[i]
+        ].map((v) => String(v)));
+      }
+      const blob = new Blob([rows.map((row) => row.join(",")).join("\n")], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "analytical_model_values.csv";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    epsilonModeEl.addEventListener("change", (event) => {
+      state.epsilonMode = event.target.value;
+      render();
+    });
+
+    document.getElementById("resetBtn").addEventListener("click", () => setPreset("default"));
+    document.getElementById("csvBtn").addEventListener("click", downloadCsv);
+
+    document.querySelectorAll("[data-preset]").forEach((button) => {
+      button.addEventListener("click", () => {
+        setPreset(button.dataset.preset);
+      });
+    });
+
+    renderControls();
+    render();
+  </script>
+</body>
+</html>
